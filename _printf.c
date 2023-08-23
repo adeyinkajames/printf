@@ -1,39 +1,54 @@
+#include <stdarg.h>
+#include <unistd.h>
 #include "main.h"
-/**
- * _printf -  function that produces output according to a format
- * @format: format.
- * Return: the number of characters printed
- */
-int _printf(const char *format, ...);
+
+int _printf(const char *format, ...)
 {
-	int i, str_chara, chara = 0;
-	va_list args;
+    va_list args;
+    int printed_chars = 0;
 
-	va_start(args, format);
+    va_start(args, format);
 
-	for (i = 0; format[i] != NULL; i++)
-	{
-	if (format[i] != '%')
-	{
-		putcharj(format[i]);
-	}
-	if (format[1] == '%' && format[i + 1] == 'c')
-	{
-		putcharj(va_arg(args, int));
-		i++
-	}
-	if (format[1] == '%' && format[i + 1] == 's')
-	{
-		str_chara = putsj(va_arg(args, char *));
-		i++
-			chara += (str_chara - 1);
-	}
-	if (format[1] == '%' && format[i + 1] == 's')
-	{
-		putcharj('%');
-	}
-	chara++;
-	}
-	va_end(args);
-	return (chara);
+    while (*format)
+    {
+        if (*format != '%')
+        {
+            // If not a '%', simply print the character
+            write(1, format, 1);
+            printed_chars++;
+        }
+        else
+        {
+            // Handle conversion specifiers
+            format++; // Move past '%'
+            if (*format == 'c')
+            {
+                // Handle %c specifier
+                char c = va_arg(args, int);
+                write(1, &c, 1);
+                printed_chars++;
+            }
+            else if (*format == 's')
+            {
+                // Handle %s specifier
+                char *s = va_arg(args, char *);
+                while (*s)
+                {
+                    write(1, s, 1);
+                    s++;
+                    printed_chars++;
+                }
+            }
+            else if (*format == '%')
+            {
+                // Handle %% specifier (print '%')
+                write(1, format, 1);
+                printed_chars++;
+            }
+        }
+        format++; // Move to the next character in the format string
+    }
+
+    va_end(args);
+    return printed_chars;
 }
