@@ -4,84 +4,51 @@
 
 int _printf(const char *format, ...)
 {
-    int count = 0;
     va_list args;
+    int printed_chars = 0;
+
     va_start(args, format);
 
     while (*format)
     {
-        if (*format == '%')
+        if (*format != '%')
         {
-            format++; // Move past '%'
-            if (*format == '\0')
-                break; // End of format string
-
-            // Process format specifiers
-            switch (*format)
-            {
-                case 'c':
-                {
-                    char c = va_arg(args, int);
-                    write(1, &c, 1);
-                    count++;
-                    break;
-                }
-                case 's':
-                {
-                    char *s = va_arg(args, char *);
-                    while (*s)
-                    {
-                        write(1, s, 1);
-                        s++;
-                        count++;
-                    }
-                    break;
-                }
-                case 'd': case 'i':
-                {
-                    int num = va_arg(args, int);
-                    if (num < 0)
-                    {
-                        char minus = '-';
-                        write(1, &minus, 1);
-                        count++;
-                        num = -num;
-                    }
-                    char buffer[20]; // Assuming the number won't be longer than 20 digits
-                    int len = 0;
-                    do
-                    {
-                        buffer[len++] = num % 10 + '0';
-                        num /= 10;
-                    } while (num);
-                    while (len > 0)
-                    {
-                        len--;
-                        write(1, &buffer[len], 1);
-                        count++;
-                    }
-                    break;
-                }
-                case '%':
-                {
-                    write(1, "%", 1);
-                    count++;
-                    break;
-                }
-                // Add more cases for other format specifiers if needed
-                default:
-                    write(1, format, 1);
-                    count++;
-            }
+            // If not a '%', simply print the character
+            write(1, format, 1);
+            printed_chars++;
         }
         else
         {
-            write(1, format, 1);
-            count++;
+            // Handle conversion specifiers
+            format++; // Move past '%'
+            if (*format == 'c')
+            {
+                // Handle %c specifier
+                char c = va_arg(args, int);
+                write(1, &c, 1);
+                printed_chars++;
+            }
+            else if (*format == 's')
+            {
+                // Handle %s specifier
+                char *s = va_arg(args, char *);
+                while (*s)
+                {
+                    write(1, s, 1);
+                    s++;
+                    printed_chars++;
+                }
+            }
+            else if (*format == '%')
+            {
+                // Handle %% specifier (print '%')
+                write(1, format, 1);
+                printed_chars++;
+            }
         }
-        format++;
+        format++; // Move to the next character in the format string
     }
 
     va_end(args);
-    return count;
+    return printed_chars;
 }
