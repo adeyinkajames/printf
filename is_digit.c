@@ -1,3 +1,4 @@
+#include "main.h"
 /**
  * is_digit - Verifies if a char is a digit
  * @c: Char to be evaluated
